@@ -38,10 +38,22 @@ module Curses
         Curses.init_color_table # ext
         # thanks to Aredridel!!!
         require 'dl/import'
-        DL.dlopen("libncurses.so.5") {
+        possibles = ["libncurses.so.5", "libncurses.dylib"]
+        Curses.close_screen
+        loop {
+        begin
+            current = possibles.shift
+            break if current.nil?
+            failed = false
+        DL.dlopen(current) {
             |h|
             d = h.sym('ESCDELAY')
             d[0] = [15].pack("L")
+        }
+        rescue
+            failed = true
+        end
+            break unless failed
         }
         scr = Curses.stdscr
         scr.keypad true unless $win32
@@ -112,8 +124,9 @@ end
 module Ruvi
 
 class EditorApp
-    KEYPRESS_COUNT_INTERVAL      = 0.1   # 0.2 - the higher this is the higher LAST_INTERVAL_KEYPRESS_COUNT is relatively
-    FORCE_REDRAW_TIMEOUT         = 0.005 # 0.1
+    # TODO - we need a sort of feedback loop between the syntax highlighting and the redraw, as syntax highlight is currently just way to slow
+    KEYPRESS_COUNT_INTERVAL      = 0.2   # 0.2 - the higher this is the higher LAST_INTERVAL_KEYPRESS_COUNT is relatively
+    FORCE_REDRAW_TIMEOUT         = 0.1   # 0.1
     LAST_INTERVAL_KEYPRESS_COUNT = 2     # heavily related to KEYPRESS_COUNT_INTERVAL
     SELECT_POLL_INTERVAL         = 0.02
     SUSPEND_KEYS                 = [26, 407]

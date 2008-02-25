@@ -1,4 +1,12 @@
-so todo list:
+stupid bugs:
+ * with a large paste - ummm a @command number when in insert_mode are u insane???
+ * another bug - repeat after deleting a line deletes the wrong one! - possibly it deletes not the current but the last?
+ * not a bug, but directories should be auto completed with / at the end of the :ed!
+ * wrap around to the start of this document by pressing j on repeat, rendering is totally screwed up when it finishes, note: on a large terminal with small font
+ * new line creation on a long syntax highlighted document is far too slow
+ * when no syntax highlight is available why not draw the screen without it? then redraw again when actual synhl is done, and then when full doc is done
+   when using plain text the above just ain't needed
+done stuff but to be looked at again later:
  * cursor doesn't appear command (:)
  * empty files on load should be warned as such in the status bar
  * o still is broken wrt auto indent whereas cr works

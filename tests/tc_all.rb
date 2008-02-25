@@ -282,6 +282,7 @@ class TC_MyTest < Test::Unit::TestCase
    def check_rendering buf, id
       @app.redraw buf
       @app.flush_finish_redraw buf
+      # TODO turn back on
       assert InternalRendering.verify_rendering(id)
    end
 

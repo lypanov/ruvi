@@ -470,7 +470,7 @@ class EditorApp
     end
 
     def send_key c
-        dbg(nil) { "key press: #{(c == 27) ? "<esc>" : (c > 256 ? Curses.keyname(c) : c.chr)}" }
+        dbg(nil) { "key press: #{(c == 27) ? "<esc>" : (c > 256 ? Curses.keyname(c) : c.chr)}" } unless $test_case
         $action_replay_log.keys_pressed << c unless $replaying
         update_focus
         @doing_macro << c.chr unless @doing_macro.nil?

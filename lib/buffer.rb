@@ -144,17 +144,20 @@ class DocumentBuffer
                yield Curses::COLOR_WHITE, false, " "
             else
             ensure_line_highlight y
+yield Curses::COLOR_WHITE, false, @data.lines[y]
+return
             @data.highlight_cache[y].each { 
-                |tag|
-                color, bold, word = *tag 
+                |color, bold, word|
                 yield color, bold, word
             }
             end
         else
             @data.highlighter.highlight_line(self, line, y) {
-               |*args|
-               yield *args
+                |color, bold, word|
+#               yield color, bold, word
             }
+yield Curses::COLOR_WHITE, false, line
+return
         end
     end
     def last_line_num
@@ -169,26 +172,26 @@ class DocumentBuffer
     end
     def initialize app, lines = BufferLineArray.new, data = nil
         if data.nil?
-        @data = BufferData.new
-        @data.highlight_cache = []
-        @data.needs_redraw = false
+            @data = BufferData.new
+            @data.highlight_cache = []
+            @data.needs_redraw = false
         end
         @got_a_scroll_already = false
         @need_to_scroll = 0
         if data.nil?
-        @data.redraw_list = []
-        @data.app = app
-        @data.lines = lines
-        @data.fname = nil
+            @data.redraw_list = []
+            @data.app = app
+            @data.lines = lines
+            @data.fname = nil
         end
         @top   = 0
         @x, @y = 0, 0
         if data.nil?
-        @data.lines_highlighted = []
-        @data.fake_buffer = false
-        @data.hlstacks, @data.classstacks, @data.tokens = [], [], []
-        @data.dlog = EditorApp::DiffLogger::DifferenceLog.new app, self
-        @data.is_paste_buffer = false
+            @data.lines_highlighted = []
+            @data.fake_buffer = false
+            @data.hlstacks, @data.classstacks, @data.tokens = [], [], []
+            @data.dlog = EditorApp::DiffLogger::DifferenceLog.new app, self
+            @data.is_paste_buffer = false
         end
         if !data.nil?
             @data = data

@@ -1,3 +1,8 @@
+0.5.0
+disabled bottom/top wrapping
+increased latency slightly thereby reducing huge delay between key press and action on slow machines
+redraw during rendering rather than right at end, gives the appearence of working being done, and lets user scan new lines while they complete, much more instant page down therefore
+
 0.4.3
 
 search history

@@ -1,7 +1,7 @@
 require 'rubygems'
 
 spec = Gem::Specification.new do |s|
-    s.name = "ruvi-prerelease"
+    s.name = "ruvi"
     s.version = "0.4.12"
     s.summary = <<-EOF
       Pure Ruby Vim-wannabe
@@ -12,7 +12,6 @@ spec = Gem::Specification.new do |s|
       trivial to extend and to implement missing vi functionality
       as plugins. It includes a gtk2 frontend and curses frontend.
     EOF
-
     s.files = <<EOF.split "\n"
 bin/ruvi.bat
 bin/ruvi
@@ -47,7 +46,6 @@ lib/baselibmods.rb
 README
 BUGS
 EOF
-
     s.bindir = "bin"
     s.require_path = 'lib'
     s.executables = ["ruvi"]

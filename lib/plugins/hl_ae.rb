@@ -44,7 +44,6 @@ class AELexerHighlighter < Highlighter
         buf.hlstacks[y] != state
     end
     def highlight_line buf, line, ypos
-        require 'strscan'
         if !@aelexer_state_cache_per_buffer.has_key? buf
             @aelexer_state_cache_per_buffer[buf] = []
         end
@@ -76,7 +75,7 @@ class AELexerHighlighter < Highlighter
                style_col = Curses::COLOR_RED
             when :mcomment, :comment
                style_col = Curses::COLOR_CYAN
-            when :gvar, :symbol
+            when :gvar, :symbol, :ivar
                style_col = Curses::COLOR_CYAN
             when :space, :tab
                ;
@@ -168,7 +167,7 @@ class AELexerHighlighter < Highlighter
             when '}', ')'
                 color = Curses::COLOR_RED  if word == ')'
                 color = Curses::COLOR_BLUE if word == '}'
-            when /^((@|@@|\$|:)[a-zA-Z_]+)$/, /^[A-Z_]+$/, /^([A-Z][a-z]+)+$/, /^\|.*?\|$/
+            when /^((@|@@|\$|:)[a-zA-Z0-9_]+)$/, /^[A-Z_]+$/, /^([A-Z][a-z]+)+$/, /^\|.*?\|$/
                 color = Curses::COLOR_CYAN
             end
             if is_proc_params

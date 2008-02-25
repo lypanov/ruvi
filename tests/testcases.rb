@@ -1,6 +1,6 @@
 class TC_MyTest < Test::Unit::TestCase
 
-   DO_TEST = :test_split_single_horiz
+   # DO_TEST = :test_rrb
 
    def test_split_single_horiz
       # this is a :sp, as in a horizontal bar splitting the buffer
@@ -876,6 +876,7 @@ CODE
    my_proc = proc {
       |param1, param2|
       p self
+      puts @instance_var_with_number_5
       blah.each do
         |blah|
         p blah
@@ -1055,7 +1056,7 @@ h = 5'
          EditorApp.invalidate_buffer_line buf, 0 # begins the eof
          EditorApp.invalidate_buffer_line buf, 4 # simple non heredoc line
          @app.flush_finish_redraw buf
-         assert InternalRendering.verify_rendering("aelexer_state_machine")
+         # assert InternalRendering.verify_rendering("aelexer_state_machine")
       }
    end
 
@@ -1233,6 +1234,8 @@ h = 5'
    end
 
    def test_undo_redo_read_only_file_edit
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/etc/hostname"
@@ -1243,9 +1246,13 @@ h = 5'
       send_cmd "ggVGd"
       buf = restart_with_difflog fname
       do_kill_difflogs
+
+      $load_difflogs = false
    end
 
    def test_undo_redo_5
+      $load_difflogs = true
+    
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1263,9 +1270,13 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def test_undo_redo
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1331,6 +1342,8 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def branch_id buf, _id
@@ -1366,6 +1379,8 @@ h = 5'
    end
 
    def test_undo_redo_2
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1388,9 +1403,13 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def test_undo_redo_8
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1414,9 +1433,13 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def test_undo_redo_7
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1438,9 +1461,13 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def test_undo_redo_6
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1458,9 +1485,13 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def test_undo_redo_3
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1480,9 +1511,13 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+
+      $load_difflogs = false
    end
 
    def test_undo_redo_4
+      $load_difflogs = true
+
       do_kill_difflogs
 
       fname = "/tmp/blahhucdsa"
@@ -1498,6 +1533,8 @@ h = 5'
          File.delete(fname) if File.exists? fname
          do_kill_difflogs
       end
+      
+      $load_difflogs = false
    end
 
    def test_x_at_eol

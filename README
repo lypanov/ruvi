@@ -6,6 +6,5 @@ for rpa:
    wget http://rpa-base.rubyforge.org/ports/ports.info -O ports.info
    (in directory above ruvi)
    rpa-buildport ruvi ports.info
-
 known problems:
    gnome-terminal interacts *horribly* with the curses frontend

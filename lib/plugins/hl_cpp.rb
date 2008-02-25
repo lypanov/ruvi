@@ -1,5 +1,3 @@
-require 'strscan'
-
 module Ruvi
 
 class CPPHighlighter < Highlighter

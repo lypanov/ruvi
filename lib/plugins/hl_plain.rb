@@ -17,7 +17,7 @@ class PlainTextHighlighter < Highlighter
         true
     end
     def highlight_line buf, line, ypos
-        yield Curses::COLOR_WHITE, true, line if block_given?
+        yield Curses::COLOR_WHITE, false, line if block_given?
     end
 end
 

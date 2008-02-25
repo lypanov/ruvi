@@ -28,7 +28,8 @@ module Ruvi # this is local to this file only for the moment...
 
       def register_command
         @app.setup_cmd(%w{rrb_rename_local_vars rrb_rename_instance_var rrb_rename_class_var rrb_rename_global_var 
-                          rrb_rename_constant rrb_extract_method rrb_rename_method rrb_push_down_method rrb_pull_up_method}.join(","), 
+                          rrb_rename_constant rrb_extract_method rrb_rename_method rrb_push_down_method 
+                          rrb_pull_up_method}.join(","), 
                        /^rrb_/) {
             |ctx|
             case ctx.cmd_line

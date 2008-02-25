@@ -46,7 +46,8 @@ require "widgets.rb"
 require "buffer.rb"
 require "movement.rb"
 require "timemachine.rb"
-require "bindings.rb"
+require "bindings/bindings.rb"
+require "bindings/bindings2.rb"
 require "search.rb"
 require "commands.rb"
 require "selections.rb"
@@ -415,6 +416,8 @@ class EditorApp
         @docview_to_ruler[current_docview].buffer = buffer
     end
 
+    REFRESH_EVERY_N_LINES = 20
+
     def flush_finish_redraw buffer
         buffer = nil # we *totally* ignore buffer now!, so lets remove it from the method prototype soon!
         position_cursor current_docview.buffer, current_docview
@@ -426,75 +429,80 @@ class EditorApp
         }
         nts = nil
         redraw_was_needed = false
-    unwatching_buffers = @widgets.dup
-    watched_buffers.each {
-        |buffer| 
-        watching_buffer = @widgets.find_all { |w| w.watch_buffer == buffer }
-        watching_buffer.each {
-            |widget|
-            unwatching_buffers.delete widget
-        } 
-        if buffer.needs_redraw or @needs_full_redraw
-            redraw_was_needed = true
-            redraw buffer
-        elsif 
-            buffer.redraw_list = buffer.redraw_list.sort.uniq
-            if buffer.got_a_scroll_already
-                watching_buffer.each {
-                    |widget|
-                    widget.canvas.scrl buffer.need_to_scroll
-                }
-                nts = buffer.need_to_scroll
-                buffer.need_to_scroll = 0
+        unwatching_buffers = @widgets.dup
+        watched_buffers.each {
+            |buffer| 
+            watching_buffer = @widgets.find_all { |w| w.watch_buffer == buffer }
+            watching_buffer.each {
+                |widget|
+                unwatching_buffers.delete widget
+            } 
+            if buffer.needs_redraw or @needs_full_redraw
+                redraw_was_needed = true
+                redraw buffer
+            elsif 
+                buffer.redraw_list = buffer.redraw_list.sort.uniq
+                if buffer.got_a_scroll_already
+                    watching_buffer.each {
+                        |widget|
+                        widget.canvas.scrl buffer.need_to_scroll
+                    }
+                    nts = buffer.need_to_scroll
+                    buffer.need_to_scroll = 0
+                end
             end
-        end
-        buffer.needs_redraw = false
-        buffer.got_a_scroll_already = false
-    }
+            buffer.needs_redraw = false
+            buffer.got_a_scroll_already = false
+        }
         @needs_full_redraw = false
+        lines_done = 0
         unwatching_buffers.each {
             |widget|
             next if widget.kind_of? Box
             (0...widget.height).each {
                |y|
                widget.render y
+               refresh_widgets if (lines_done % REFRESH_EVERY_N_LINES) == 0
+               lines_done += 1
             }
         }
-    watched_buffers.each {
-        |buffer|
-        buffer.redraw_list.delete_if { |y| (y < buffer.top) or (y > buffer.top + screen_height) }
-        last_dirty_list     = buffer.dirty_list || []
-        new_y               = buffer.y
-        buffer.dirty_list   = [new_y, new_y - (nts || 0)]
-        buffer.redraw_list += last_dirty_list
-        buffer.redraw_list += buffer.dirty_list
-        buffer.redraw_list = buffer.redraw_list.sort.uniq
-        watching_buffer = @widgets.find_all { |w| w.watch_buffer == buffer }
-        buffer.redraw_list.each {
-            |y| 
-            watching_buffer.each {
-                |widget|
-                dbg(:dbg_highlight) { "rendering #{y} for widget type #{widget.type}" }
-                widget.render y - buffer.top
+        refresh_widgets
+        watched_buffers.each {
+            |buffer|
+            buffer.redraw_list.delete_if { |y| (y < buffer.top) or (y > buffer.top + screen_height) }
+            last_dirty_list     = buffer.dirty_list || []
+            new_y               = buffer.y
+            buffer.dirty_list   = [new_y, new_y - (nts || 0)]
+            buffer.redraw_list += last_dirty_list
+            buffer.redraw_list += buffer.dirty_list
+            buffer.redraw_list = buffer.redraw_list.sort.uniq
+            watching_buffer = @widgets.find_all { |w| w.watch_buffer == buffer }
+            buffer.redraw_list.each {
+                |y| 
+                watching_buffer.each {
+                    |widget|
+                    dbg(:dbg_highlight) { "rendering #{y} for widget type #{widget.type}" }
+                    widget.render y - buffer.top
+                    refresh_widgets if (lines_done % REFRESH_EVERY_N_LINES) == 0
+                    lines_done += 1
+                }
             }
+            buffer.redraw_list = []
         }
-        buffer.redraw_list = []
-    }
         if !nts.nil? or redraw_was_needed
             # we clear the bottom line of the buffer 
             # as the text scrolling appears to draw 
             # outside its draw area
-
-          descs = [WinDescs::instance.descs[@docview]]
-          descs << WinDescs::instance.descs[@docview2] if @widgets.include? @docview2
-          descs.each {
+            descs = [WinDescs::instance.descs[@docview]]
+            descs << WinDescs::instance.descs[@docview2] if @widgets.include? @docview2
+            descs.each {
             |desc|
             scr = WinDescs::instance.stdscr
             scr.set_attr false, Curses::COLOR_WHITE, Curses::COLOR_BLACK
             scr.setpos(desc.y + desc.sy - 1, 0) # y, x
             scr.addstr " " * (scr.maxx - 1)
             scr.refresh
-          }
+        }
         end
         refresh_widgets
         display_cursor current_docview.buffer, current_docview
@@ -752,8 +760,6 @@ class EditorApp
     end
 
     def start_background_highlighter
-    # TODO enable the background highlighter
-       return
         Thread.new {
             while true
                # FIXME - 
@@ -840,10 +846,10 @@ unless $test_case
    }
    buf = EditorApp.new_buffer app, :need_bnum if arguments.empty?
    app.switch_to_buffer buf
-   app.start_background_highlighter
    debug_out_fname  = "/tmp/debug_log"
    replay_out_fname = "/tmp/replay_dump"
    begin
+      # app.start_background_highlighter
       if $replaying
          $action_replay_log.keys_pressed.each {
             |c|

@@ -1,3 +1,5 @@
+$no_wrap = true
+
 module Ruvi
 
 class EditorApp
@@ -144,9 +146,9 @@ class EditorApp
         return if buffer.lines.empty?
         new_doc_y = buffer.y + y_diff
         if new_doc_y < 0
-            scroll_to_bottom buffer
+            scroll_to_bottom buffer unless $no_wrap
         elsif new_doc_y > buffer.lines.length - 1
-            scroll_to_top buffer
+            scroll_to_top buffer unless $no_wrap
         elsif new_doc_y < buffer.top
             diff = buffer.y - new_doc_y
             diff.times { scroll_up(buffer) }

@@ -1,8 +1,8 @@
 require 'rpa/install'
  
 class Install_ruvi < RPA::Install::FullInstaller
-    name "ruvi-prerelease"
-    version "0.4.12-7"
+    name "ruvi"
+    version "0.4.12-1"
     classification Application
     build do
        installdocs %w[BUGS README VersionLog]
