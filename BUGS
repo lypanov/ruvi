@@ -1,0 +1,52 @@
+so todo list:
+ * cursor doesn't appear command (:)
+ * empty files on load should be warned as such in the status bar
+ * o still is broken wrt auto indent whereas cr works
+ * deleting a line via backspace results is totally messed up line caching - SOMETIMES
+ * completion doesn't add a / for a dir, thusly lib<tab>bu<tab> doesn't work
+ * horizontal split bar
+ * o doesn't appear to auto indent when in a plain text file
+ * q! on an already reverted buffer puts ruvi into an infinite loop
+ * need at the very least a md5 sum of the current buffer text in the edlog to prevent very stupid replays
+ * highlighting doesn't work for @docview2 (number in identifier?)
+ * i appears to do A when on final char in line???????
+ * sometimes undo/redo appears to duplicate lines on a changeset... really wierd bugs... need extra checkcs on the logging... think thats the only way to solve this problem right?
+ * ruvi can't cope at all with long lines anymore... maybe should wrap? or do the cheap and not allow? or... allow horiz scrolling?
+   there are still major undo/redo fuckups, this needs to be rethought - paranoid sanity checks need to be used
+   2dw, 2cw etc
+   release 0.4.12 :)
+   highlighting debug widget
+optimisations:
+   waiting for u/ctrl-r takes too slow when key repeat kicks in
+   wonder why there are big pauses sometimes... gc and stuff maybe? ask neoneye...
+   store an md5 sum of buffer, and marshal out the highlighting information in a big single block - can be improved later on
+diff logging:
+   an unnamed file doesn't have recovery! how to fix?
+   diff file gets very big. maybe when > 200kb should remove a load? - must be done atomically of couse... maybe difficult
+   meta stuff - maybe could use the idea about scripting vim and get some results using that?
+                maybe need to do assertions to make certain that undo is possible?
+                e.g, provably demonstrate that undo/redo keeps entire state for several tests?
+                in a manner thats not random... gonna be difficult...
+   editing with ruvi then vim then ruvi again means that the undo/redo stuff is obviously going to be fucked
+   this has to be fixed by storing sha1 sums or something but how to compute incrementally and fast?
+      need a message digest algm with the property that a line if its previous 
+      value is known can be removed and added again does this exist?
+   diff logs in general are fucking huge, for example when moving something its a delete and an add. 
+      the deletes could easily refer to the data used in the adds... could be more efficient of course
+      but this is a trivial optimisation once a line digest algm is in use...
+      the BUGS file log is already 250kb after just a few minutes editing... this is awful
+      major improvements to difflog format and flushing of old edits (maybe just 5 edit sessions back?)
+from TODO
+   new setting should be added to do free movement (same keybindings as vim?)
+   selection doesn't show for starting spaces at start of selected line
+   after typing tabs on comment line backspace to remove tabs doesn't work, difficult one...
+   cw on a word then undo seems to first undo the delete and then put it back, it should be a single action
+   highlighting is wierd for $win32
+   searching should default to non regular expression mode and have a keybinding to switch to regexps...
+   qxBLUBq@@x with a selection linewise macros per line
+   :r! / :filter! with pipe through
+   :vsp
+   convert class browser thingy to a pure plugin
+      (apart from the dep on classstacks of course)
+   ruvi should make an unnamed swap file in the current directory if possible
+   X at start of line

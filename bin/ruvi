@@ -1,0 +1,10 @@
+#!/usr/bin/ruby
+require 'rbconfig'
+$win32 = ::Config::CONFIG["arch"] =~ /dos|win32/i
+unless $win32 
+   dir = File.dirname((File.readlink($0) rescue $0)) + "/../lib/" 
+   dir = File.dirname(__FILE__) + "/../lib/" if dir.nil?
+   $:.unshift dir
+end
+require "curses-ui"
+require "shikaku"

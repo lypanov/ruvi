@@ -1,0 +1,55 @@
+0.4.3
+
+search history
+highlighting improvements
+class/method/module hierarchy 
+   - ctrl-x (still needs optimisation)
+buffer list - ctrl-s
+major search improvements
+   - multiple matches per line, 
+     speedups, ctrl-p
+fixed several bugs in word skip commands
+   - b/B/w/W/e/E
+fixed bug with cw/dw 
+   - it would not copy previous content
+numerous code cleanups
+buffer management improvement
+   - when switching previous 
+     position is recalled
+
+0.4.4
+
+crash fixes
+   crash case when rendering lines longer 
+      than current display width
+   dd on last line of shortfile
+   <<, >> without selection
+several major fixes to search
+various nice cleanups
+rvsh.bat file and a few other fixes 
+   needed for native win32 ruby and cgywin
+fix crash on creation of new file
+work when the rvsh in path not symlink
+edit recovery via diff log replay on startup
+persistant undo/redo list storage via diff log
+write out debug_log if USR1 is recieved
+various minor optimisation
+
+0.4.5
+
+fixing ?a as first command on new file
+fix pagedown/up keys
+fixing various rendering problems - shortfiles and long lines
+fix L to go to bottom of text rather than bottom of screen 
+   - different for short texts
+several code refactors
+store difflog in +filename.edlog
+several additions to highlighting
+kde frontend 
+   - slow and incomplete, but proof of concept
+implement "s"
+adding test casing framework
+fixing "selection till end of file and delete"
+adding --version parameter and setting version to 0.5.5
+fix difflog creation for unnamed files 
+   - called without parameters

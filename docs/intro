@@ -1,0 +1,10 @@
+ruvi is a vim clone.
+you can use most of the normal keybindings.
+including v, V and ctrl-v.
+the file ~/.ruvirc is executed on startup, it is ruby code.
+application settings can be accessed via app.settings.
+example: app.settings[:ts] = "4" # sets the tab size
+adding multi-key (e.g "\C-xa" -> ctrl-x, followed by an a) bindings:
+   app.add_binding(keyseq) { my_code }
+adding commands (e.g :mycmd myparam) for example:
+   app.setup_cmd("command", /regexp/) { |cmdline, the_regexp| cmdline =~ the_regexp; print $1 }

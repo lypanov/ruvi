@@ -1,0 +1,147 @@
+# 01:40 <@lypanov> writing syntax highlighting
+# 01:40 <@lypanov> and need a data structure
+# 01:40 <@lypanov> to store the highlight state
+# 01:41 <@lypanov> basically.
+# 01:41 <@lypanov> per token
+# 01:41 <@lypanov> morph is a stupid work. change*
+# 01:41 <@lypanov> easy to do
+# 01:42 <@lypanov> but. efficiently
+# 01:42 <@lypanov> its a bitch :(
+    
+01:39 -!- mode/#kde-dev [+o lypanov] by ChanServ
+01:39 -!- Irssi: Join to #kde-dev was synced in 0 secs
+01:39 <@lypanov> ummm
+01:39 <@lypanov> SadEagle: ping?
+01:39 <+SadEagle> pong
+01:39  * lypanov needs a data structure guru :)
+01:39 <@lypanov> you qualified? ;-)
+01:40 <+SadEagle> I guess so.
+01:40 <@lypanov> k
+01:40 <@lypanov> right
+01:40 <@lypanov> i'll paste
+01:40 <@lypanov> my idea
+01:40 <@lypanov> # need an efficient storage mechanism for the syntax state
+01:40 <@lypanov> # syntax state is composed of a list of symbols/strings
+01:40 <@lypanov> # paired with state morph info - list of pos/neg states
+01:40 <@lypanov> # should be possible to get the state overview information
+01:40 <@lypanov> # at any level of the syntax tree with pos/neg states
+01:40 <@lypanov> # overriding states earlier on in the syntax state list.
+01:40 <@lypanov> writing syntax highlighting
+01:40 <@lypanov> and need a data structure
+01:40 <@lypanov> to store the highlight state
+01:41 <@lypanov> basically.
+01:41 <@lypanov> per token
+01:41 <@lypanov> morph is a stupid work. change*
+01:41 <@lypanov> easy to do
+01:42 <@lypanov> but. efficiently
+01:42 <@lypanov> its a bitch :(
+01:42 <+SadEagle> ok, can you please give a human-readable description of the problem? ;-)
+01:42 <@lypanov> yup :)
+01:53 <@lypanov> primitive syntax highlighting data structure:
+01:53 <@lypanov>     for each parsed token in the input data we need to store a
+01:53 <@lypanov>         state change list: e.g [Add("#{"), Remove(:string)
+01:53 <@lypanov>     at any point the syntax rendering code should be able to retrieve
+01:53 <@lypanov>         a snapshot of the highlight state at the end of a given token.
+01:53 <@lypanov>     this snapshoting would involve:
+01:53 <@lypanov>         iterating over the entire state changes list, applying
+01:53 <@lypanov>         them in order. and returning the fully inherited state for
+01:53 <@lypanov>         any given token.
+01:53 <@lypanov> umm
+01:53 <@lypanov> i can only think of clever caching techniques
+01:53 <@lypanov> but.
+01:53 <@lypanov> i'm sure that there are some nice
+01:54 <@lypanov> sparse data structures that can do this in a "nicer" way
+01:54 <+SadEagle> can you please elaborate on what the state change is?
+01:57 <@lypanov>  e.g [Add("#{"), Remove(:string)
+01:57 <+SadEagle> I don't understand the example
+01:57 <@lypanov> this is for the ruby code:
+01:57 <@lypanov> '
+01:57 <@lypanov> print "blah == #{blah}"
+01:57 <@lypanov> the Add adds the state string "#{"
+01:58 <@lypanov> the Remove removes the symbol :string
+01:58 <@lypanov> therefore
+01:58 <@lypanov> making it code
+01:58 <@lypanov> not string :)
+01:58 <@lypanov> at the end
+01:58 <@lypanov> the "}"
+01:58 <@lypanov> would say
+01:58 <@lypanov> Remove "#{", Add :String
+01:59 <@lypanov> string*
+01:59 <+SadEagle> ah, I see.
+01:59  * SadEagle goes to grab some paper.
+01:59 <+SadEagle> interesting, indeed
+01:59 <@lypanov> yup i thought you might like it ;-)
+01:59 <+SadEagle> of course, a good question to ask is how large is the chain of environments.
+02:00 <+SadEagle> if the deepest nesting is < 100, you can just walk from parent to child..
+02:00 <@lypanov> well
+02:00 <@lypanov> without obvious optimisations
+02:00 <@lypanov> its the entire file length
+02:00 <@lypanov> e.g 150mb of xml :)
+02:01 <+SadEagle> hmm? why would you need the entire file, you only care about regions, no?
+02:02 <@lypanov> well
+02:02 <@lypanov> a <xmp> at the start
+02:02 <@lypanov> would change things quite a bit
+02:02 <@lypanov> so
+02:02 <@lypanov> i need to store the data in a highly efficient manner
+02:02 <@lypanov> and to allow for non calculated data
+02:03 <@lypanov> i.e
+02:03 <@lypanov> vim blah.xml
+02:03 <@lypanov> shows first page
+02:03 <@lypanov> you G to the end of the file
+02:03 <@lypanov> and it should not parse it all
+02:03 <@lypanov> it should read the last page
+02:03 <@lypanov> fill the data structure in for each token
+02:03 <@lypanov> and render
+02:04 <@lypanov> then. in the background. it should be doing the rest of the file
+02:04 <@lypanov> (with some constraints admittedly)
+02:04 <@lypanov> and the highlighter should seek back from the top of the page
+02:04 <@lypanov> to find the first consistant state
+02:04 <@lypanov> but. thats a lot of work
+02:04 <@lypanov> but. i need to keep that sort of stuff in mind
+02:05 <@lypanov> while finding the perfect data structure :)
+02:06 <+SadEagle> yeah, but region chains would still work...
+02:10 <@lypanov> chains?
+02:10 <+SadEagle> well, imagine separating out the source code into multiple regions, with a pointer to the parent.
+02:11 <+SadEagle> w/some provision for an "incomplete" pointer, and some sort of auxilary by-line structure letting you
+index into a region.
+02:11 <@lypanov> and storing the complete state at the start of each region?
+02:11 <@lypanov> yeah. that was what i was thinking with "caching"
+02:11 <+SadEagle> no, just the operations.
+02:12 <+SadEagle> but you only care about the parent of the region, so the depth of nesting  should be reasonable.
+02:12 <@lypanov> "parent"?
+02:12 <@lypanov> ah
+02:12 <@lypanov> tree of states
+02:13 <@lypanov> stack. no duplication of add / remove
+02:13 <@lypanov> ?
+02:13 <+SadEagle> yeah.
+02:16 <@lypanov> umm
+02:16 <@lypanov> how can you store a removed state?
+02:16 <@lypanov> a negative region?
+02:16 <+SadEagle> no, associated a removal of a state with a region.
+02:17 <@lypanov> removal at open
+02:17 <@lypanov> addition at close
+02:17 <@lypanov> in the case of :string
+02:17 <@lypanov> with "#{blah}"
+02:17 <+SadEagle> no, tgere is no addition at close.
+02:17 <@lypanov> ?
+02:17 <+SadEagle> since you would only care about parent, not children.
+02:17 <+SadEagle> all you would have to do is walk from the root to the child, and keep track of active states.
+02:17 <@lypanov> m
+02:18 <+SadEagle> although..
+02:18 <+SadEagle> well, you are right in that removal at end is how you want to walk across the structure
+02:18 <@lypanov> yup
+02:18 <+SadEagle> it's kind of implicit, though..
+02:18 <@lypanov> ah
+02:18  * lypanov thinks
+02:19 <@lypanov> confused
+02:19 <@lypanov> how is the difference between a positive region
+02:19 <@lypanov> and a negative region stored?
+02:19 <@lypanov> postive
+02:19 <@lypanov> " and "
+02:19 <@lypanov> negative
+02:19 <@lypanov> the #{ and } inside the " and "
+02:25 <+SadEagle> ahh, then it's just an anti-string region, yes.
+02:25 <+SadEagle> actually, the more interesting thing is what to do when you see a "foo in the middle of a file.
+02:25 <+SadEagle> since you don't know whether it's a string or not for sure until you've handled everything beforehand
+02:26 <@lypanov> right
+02:27 <@lypanov> syntax highlighting ain't easy :)
